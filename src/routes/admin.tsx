@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { PDFDocument } from "pdf-lib";
+import { ingestManualVolume, getManualSetStats } from "@/lib/manual-ingest.functions";
 import {
   ArrowLeft,
   Loader2,
@@ -31,6 +33,7 @@ import {
   AlertCircle,
   Circle,
   Plus,
+  Database,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
