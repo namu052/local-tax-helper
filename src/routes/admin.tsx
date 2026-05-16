@@ -538,18 +538,170 @@ function DetailDialog({
             onChanged={onChanged}
           />
 
-          <div className="border-2 border-dashed rounded-md p-4 bg-muted/40">
-            <p className="text-sm font-semibold mb-1">PDF 내용 DB화</p>
-            <p className="text-xs text-muted-foreground">
-              PDF 내용 DB화는 3단계에서 구현 예정입니다.
-            </p>
-            <Button size="sm" variant="outline" className="mt-3" disabled>
-              PDF 내용 DB화 실행 (3단계 예정)
-            </Button>
-          </div>
+          <IngestPanel set={set} v1={v1} v2={v2} isAdmin={isAdmin} />
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+type IngestStatus = "idle" | "v1" | "v2" | "saving" | "done" | "error";
+
+function IngestPanel({
+  set,
+  v1,
+  v2,
+  isAdmin,
+}: {
+  set: ManualSet;
+  v1: ManualVolume | undefined;
+  v2: ManualVolume | undefined;
+  isAdmin: boolean;
+}) {
+  const fetchStats = useServerFn(getManualSetStats);
+  const ingest = useServerFn(ingestManualVolume);
+  const [stats, setStats] = useState<Record<number, { chunkCount: number; lastIngestAt: string | null }>>({});
+  const [status, setStatus] = useState<IngestStatus>("idle");
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [lastResult, setLastResult] = useState<{ failedPages: number[]; totalChunks: number } | null>(null);
+
+  const reloadStats = useCallback(() => {
+    fetchStats({ data: { setId: set.id } }).then(setStats).catch(() => setStats({}));
+  }, [fetchStats, set.id]);
+
+  useEffect(() => {
+    reloadStats();
+  }, [reloadStats]);
+
+  const totalChunks = (stats[1]?.chunkCount ?? 0) + (stats[2]?.chunkCount ?? 0);
+  const lastIngestAt = [stats[1]?.lastIngestAt, stats[2]?.lastIngestAt]
+    .filter(Boolean)
+    .sort()
+    .pop();
+  const hasExisting = totalChunks > 0;
+
+  const runIngest = async () => {
+    setConfirmOpen(false);
+    setErrorMsg(null);
+    setLastResult(null);
+    try {
+      let aggFailed: number[] = [];
+      let aggChunks = 0;
+      if (v1) {
+        setStatus("v1");
+        const r = await ingest({ data: { volumeId: v1.id } });
+        aggFailed = aggFailed.concat(r.failedPages.map((p) => p));
+        aggChunks += r.totalChunks;
+      }
+      if (v2) {
+        setStatus("v2");
+        const r = await ingest({ data: { volumeId: v2.id } });
+        aggFailed = aggFailed.concat(r.failedPages.map((p) => p + 10000)); // mark vol2
+        aggChunks += r.totalChunks;
+      }
+      setStatus("saving");
+      reloadStats();
+      setStatus("done");
+      setLastResult({ failedPages: aggFailed, totalChunks: aggChunks });
+      toast.success(`DB화 완료: 총 ${aggChunks}개 청크 저장`);
+    } catch (e: any) {
+      setStatus("error");
+      setErrorMsg(e?.message ?? String(e));
+      toast.error("DB화 실패: " + (e?.message ?? String(e)));
+    }
+  };
+
+  const statusLabel: Record<IngestStatus, string> = {
+    idle: "처리 대기",
+    v1: "1권 처리 중...",
+    v2: "2권 처리 중...",
+    saving: "청크 저장 중...",
+    done: "완료",
+    error: "오류 발생",
+  };
+
+  const running = status === "v1" || status === "v2" || status === "saving";
+
+  return (
+    <div className="border-2 border-dashed rounded-md p-4 bg-muted/40 space-y-3">
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-semibold flex items-center gap-2">
+          <Database className="h-4 w-4" /> PDF 내용 DB화
+        </p>
+        <Badge variant={status === "done" ? "default" : status === "error" ? "destructive" : "secondary"}>
+          {statusLabel[status]}
+        </Badge>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+        <StatBox label="전체 청크" value={totalChunks} />
+        <StatBox label="1권 청크" value={stats[1]?.chunkCount ?? 0} />
+        <StatBox label="2권 청크" value={stats[2]?.chunkCount ?? 0} />
+        <StatBox
+          label="마지막 DB화"
+          value={lastIngestAt ? new Date(lastIngestAt).toLocaleString("ko-KR") : "-"}
+        />
+      </div>
+
+      <div className="space-y-1.5 text-xs text-muted-foreground leading-relaxed">
+        <p>
+          ⚠ PDF 텍스트 추출 결과는 원본 파일의 형식에 따라 일부 오류가 있을 수 있습니다. 담당자는 AI 답변에
+          활용하기 전에 주요 청크 내용을 확인해야 합니다.
+        </p>
+        <p>※ 본 시스템은 교육용 프로토타입이며, 실제 법령 판단이나 감면 확정 용도로 사용하지 않습니다.</p>
+      </div>
+
+      {errorMsg && (
+        <div className="text-xs text-destructive border border-destructive/40 rounded p-2 bg-destructive/5">
+          {errorMsg}
+        </div>
+      )}
+
+      {lastResult && lastResult.failedPages.length > 0 && (
+        <div className="text-xs text-amber-700 border border-amber-300 rounded p-2 bg-amber-50">
+          일부 페이지 추출 실패: {lastResult.failedPages.length}건
+        </div>
+      )}
+
+      {isAdmin && (
+        <Button
+          size="sm"
+          onClick={() => (hasExisting ? setConfirmOpen(true) : runIngest())}
+          disabled={running || (!v1 && !v2)}
+        >
+          {running ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Database className="h-3.5 w-3.5 mr-1" />}
+          {hasExisting ? "PDF 내용 다시 DB화" : "PDF 내용 DB화 시작"}
+        </Button>
+      )}
+      {!v1 && !v2 && (
+        <p className="text-xs text-muted-foreground">먼저 1권 또는 2권 PDF를 업로드하세요.</p>
+      )}
+
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>다시 DB화하시겠습니까?</DialogTitle>
+            <DialogDescription>
+              기존 청크({totalChunks}개)가 모두 삭제되고 새로 생성됩니다. 이 작업은 되돌릴 수 없습니다.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setConfirmOpen(false)}>취소</Button>
+            <Button variant="destructive" onClick={runIngest}>삭제 후 다시 DB화</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function StatBox({ label, value }: { label: string; value: number | string }) {
+  return (
+    <div className="border rounded-md bg-card p-2">
+      <p className="text-muted-foreground">{label}</p>
+      <p className="font-semibold mt-0.5 text-foreground truncate">{value}</p>
+    </div>
   );
 }
 
