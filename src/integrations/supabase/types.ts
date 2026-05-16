@@ -550,6 +550,17 @@ export type Database = {
         }
         Returns: boolean
       }
+      lookup_application_by_receipt: {
+        Args: { _phone: string; _receipt: string }
+        Returns: {
+          created_at: string
+          exemption_types: Json
+          officer_answers: Json
+          receipt_number: string
+          status: string
+          tax_type: string
+        }[]
+      }
     }
     Enums: {
       app_role: "officer" | "admin"
