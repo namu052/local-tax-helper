@@ -15,6 +15,7 @@ import { Route as ApplyRouteImport } from './routes/apply'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as OfficerIndexRouteImport } from './routes/officer.index'
+import { Route as OfficerManualRouteImport } from './routes/officer.manual'
 import { Route as OfficerLoginRouteImport } from './routes/officer.login'
 import { Route as OfficerApplicationsRouteImport } from './routes/officer.applications'
 import { Route as ApplyCompleteRouteImport } from './routes/apply.complete'
@@ -50,6 +51,11 @@ const OfficerIndexRoute = OfficerIndexRouteImport.update({
   path: '/',
   getParentRoute: () => OfficerRoute,
 } as any)
+const OfficerManualRoute = OfficerManualRouteImport.update({
+  id: '/manual',
+  path: '/manual',
+  getParentRoute: () => OfficerRoute,
+} as any)
 const OfficerLoginRoute = OfficerLoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -80,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/apply/complete': typeof ApplyCompleteRoute
   '/officer/applications': typeof OfficerApplicationsRouteWithChildren
   '/officer/login': typeof OfficerLoginRoute
+  '/officer/manual': typeof OfficerManualRoute
   '/officer/': typeof OfficerIndexRoute
   '/officer/applications/$id': typeof OfficerApplicationsIdRoute
 }
@@ -91,6 +98,7 @@ export interface FileRoutesByTo {
   '/apply/complete': typeof ApplyCompleteRoute
   '/officer/applications': typeof OfficerApplicationsRouteWithChildren
   '/officer/login': typeof OfficerLoginRoute
+  '/officer/manual': typeof OfficerManualRoute
   '/officer': typeof OfficerIndexRoute
   '/officer/applications/$id': typeof OfficerApplicationsIdRoute
 }
@@ -104,6 +112,7 @@ export interface FileRoutesById {
   '/apply/complete': typeof ApplyCompleteRoute
   '/officer/applications': typeof OfficerApplicationsRouteWithChildren
   '/officer/login': typeof OfficerLoginRoute
+  '/officer/manual': typeof OfficerManualRoute
   '/officer/': typeof OfficerIndexRoute
   '/officer/applications/$id': typeof OfficerApplicationsIdRoute
 }
@@ -118,6 +127,7 @@ export interface FileRouteTypes {
     | '/apply/complete'
     | '/officer/applications'
     | '/officer/login'
+    | '/officer/manual'
     | '/officer/'
     | '/officer/applications/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -129,6 +139,7 @@ export interface FileRouteTypes {
     | '/apply/complete'
     | '/officer/applications'
     | '/officer/login'
+    | '/officer/manual'
     | '/officer'
     | '/officer/applications/$id'
   id:
@@ -141,6 +152,7 @@ export interface FileRouteTypes {
     | '/apply/complete'
     | '/officer/applications'
     | '/officer/login'
+    | '/officer/manual'
     | '/officer/'
     | '/officer/applications/$id'
   fileRoutesById: FileRoutesById
@@ -195,6 +207,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/officer/'
       preLoaderRoute: typeof OfficerIndexRouteImport
+      parentRoute: typeof OfficerRoute
+    }
+    '/officer/manual': {
+      id: '/officer/manual'
+      path: '/manual'
+      fullPath: '/officer/manual'
+      preLoaderRoute: typeof OfficerManualRouteImport
       parentRoute: typeof OfficerRoute
     }
     '/officer/login': {
@@ -252,12 +271,14 @@ const OfficerApplicationsRouteWithChildren =
 interface OfficerRouteChildren {
   OfficerApplicationsRoute: typeof OfficerApplicationsRouteWithChildren
   OfficerLoginRoute: typeof OfficerLoginRoute
+  OfficerManualRoute: typeof OfficerManualRoute
   OfficerIndexRoute: typeof OfficerIndexRoute
 }
 
 const OfficerRouteChildren: OfficerRouteChildren = {
   OfficerApplicationsRoute: OfficerApplicationsRouteWithChildren,
   OfficerLoginRoute: OfficerLoginRoute,
+  OfficerManualRoute: OfficerManualRoute,
   OfficerIndexRoute: OfficerIndexRoute,
 }
 

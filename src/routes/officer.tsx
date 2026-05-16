@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, FileText, Settings, LogOut, Loader2 } from "lucide-react";
+import { LayoutDashboard, FileText, Settings, LogOut, Loader2, BookOpen } from "lucide-react";
 
 export const Route = createFileRoute("/officer")({
   component: OfficerLayout,
@@ -45,6 +45,7 @@ function OfficerLayout() {
             <nav className="flex items-center gap-1">
               <NavBtn to="/officer" icon={<LayoutDashboard className="h-4 w-4" />}>대시보드</NavBtn>
               <NavBtn to="/officer/applications" icon={<FileText className="h-4 w-4" />}>신청 목록</NavBtn>
+              <NavBtn to="/officer/manual" icon={<BookOpen className="h-4 w-4" />}>매뉴얼 검색</NavBtn>
               {role === "admin" && (
                 <NavBtn to="/admin" icon={<Settings className="h-4 w-4" />}>관리자</NavBtn>
               )}
