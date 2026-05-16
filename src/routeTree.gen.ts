@@ -9,38 +9,180 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as OfficerRouteImport } from './routes/officer'
+import { Route as LookupRouteImport } from './routes/lookup'
+import { Route as ApplyRouteImport } from './routes/apply'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as OfficerIndexRouteImport } from './routes/officer.index'
+import { Route as OfficerLoginRouteImport } from './routes/officer.login'
+import { Route as OfficerApplicationsRouteImport } from './routes/officer.applications'
+import { Route as ApplyCompleteRouteImport } from './routes/apply.complete'
+import { Route as OfficerApplicationsIdRouteImport } from './routes/officer.applications.$id'
 
+const OfficerRoute = OfficerRouteImport.update({
+  id: '/officer',
+  path: '/officer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LookupRoute = LookupRouteImport.update({
+  id: '/lookup',
+  path: '/lookup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApplyRoute = ApplyRouteImport.update({
+  id: '/apply',
+  path: '/apply',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OfficerIndexRoute = OfficerIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => OfficerRoute,
+} as any)
+const OfficerLoginRoute = OfficerLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => OfficerRoute,
+} as any)
+const OfficerApplicationsRoute = OfficerApplicationsRouteImport.update({
+  id: '/applications',
+  path: '/applications',
+  getParentRoute: () => OfficerRoute,
+} as any)
+const ApplyCompleteRoute = ApplyCompleteRouteImport.update({
+  id: '/complete',
+  path: '/complete',
+  getParentRoute: () => ApplyRoute,
+} as any)
+const OfficerApplicationsIdRoute = OfficerApplicationsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => OfficerApplicationsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/apply': typeof ApplyRouteWithChildren
+  '/lookup': typeof LookupRoute
+  '/officer': typeof OfficerRouteWithChildren
+  '/apply/complete': typeof ApplyCompleteRoute
+  '/officer/applications': typeof OfficerApplicationsRouteWithChildren
+  '/officer/login': typeof OfficerLoginRoute
+  '/officer/': typeof OfficerIndexRoute
+  '/officer/applications/$id': typeof OfficerApplicationsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/apply': typeof ApplyRouteWithChildren
+  '/lookup': typeof LookupRoute
+  '/apply/complete': typeof ApplyCompleteRoute
+  '/officer/applications': typeof OfficerApplicationsRouteWithChildren
+  '/officer/login': typeof OfficerLoginRoute
+  '/officer': typeof OfficerIndexRoute
+  '/officer/applications/$id': typeof OfficerApplicationsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/apply': typeof ApplyRouteWithChildren
+  '/lookup': typeof LookupRoute
+  '/officer': typeof OfficerRouteWithChildren
+  '/apply/complete': typeof ApplyCompleteRoute
+  '/officer/applications': typeof OfficerApplicationsRouteWithChildren
+  '/officer/login': typeof OfficerLoginRoute
+  '/officer/': typeof OfficerIndexRoute
+  '/officer/applications/$id': typeof OfficerApplicationsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/apply'
+    | '/lookup'
+    | '/officer'
+    | '/apply/complete'
+    | '/officer/applications'
+    | '/officer/login'
+    | '/officer/'
+    | '/officer/applications/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/admin'
+    | '/apply'
+    | '/lookup'
+    | '/apply/complete'
+    | '/officer/applications'
+    | '/officer/login'
+    | '/officer'
+    | '/officer/applications/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/apply'
+    | '/lookup'
+    | '/officer'
+    | '/apply/complete'
+    | '/officer/applications'
+    | '/officer/login'
+    | '/officer/'
+    | '/officer/applications/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
+  ApplyRoute: typeof ApplyRouteWithChildren
+  LookupRoute: typeof LookupRoute
+  OfficerRoute: typeof OfficerRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/officer': {
+      id: '/officer'
+      path: '/officer'
+      fullPath: '/officer'
+      preLoaderRoute: typeof OfficerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lookup': {
+      id: '/lookup'
+      path: '/lookup'
+      fullPath: '/lookup'
+      preLoaderRoute: typeof LookupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/apply': {
+      id: '/apply'
+      path: '/apply'
+      fullPath: '/apply'
+      preLoaderRoute: typeof ApplyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +190,87 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/officer/': {
+      id: '/officer/'
+      path: '/'
+      fullPath: '/officer/'
+      preLoaderRoute: typeof OfficerIndexRouteImport
+      parentRoute: typeof OfficerRoute
+    }
+    '/officer/login': {
+      id: '/officer/login'
+      path: '/login'
+      fullPath: '/officer/login'
+      preLoaderRoute: typeof OfficerLoginRouteImport
+      parentRoute: typeof OfficerRoute
+    }
+    '/officer/applications': {
+      id: '/officer/applications'
+      path: '/applications'
+      fullPath: '/officer/applications'
+      preLoaderRoute: typeof OfficerApplicationsRouteImport
+      parentRoute: typeof OfficerRoute
+    }
+    '/apply/complete': {
+      id: '/apply/complete'
+      path: '/complete'
+      fullPath: '/apply/complete'
+      preLoaderRoute: typeof ApplyCompleteRouteImport
+      parentRoute: typeof ApplyRoute
+    }
+    '/officer/applications/$id': {
+      id: '/officer/applications/$id'
+      path: '/$id'
+      fullPath: '/officer/applications/$id'
+      preLoaderRoute: typeof OfficerApplicationsIdRouteImport
+      parentRoute: typeof OfficerApplicationsRoute
+    }
   }
 }
 
+interface ApplyRouteChildren {
+  ApplyCompleteRoute: typeof ApplyCompleteRoute
+}
+
+const ApplyRouteChildren: ApplyRouteChildren = {
+  ApplyCompleteRoute: ApplyCompleteRoute,
+}
+
+const ApplyRouteWithChildren = ApplyRoute._addFileChildren(ApplyRouteChildren)
+
+interface OfficerApplicationsRouteChildren {
+  OfficerApplicationsIdRoute: typeof OfficerApplicationsIdRoute
+}
+
+const OfficerApplicationsRouteChildren: OfficerApplicationsRouteChildren = {
+  OfficerApplicationsIdRoute: OfficerApplicationsIdRoute,
+}
+
+const OfficerApplicationsRouteWithChildren =
+  OfficerApplicationsRoute._addFileChildren(OfficerApplicationsRouteChildren)
+
+interface OfficerRouteChildren {
+  OfficerApplicationsRoute: typeof OfficerApplicationsRouteWithChildren
+  OfficerLoginRoute: typeof OfficerLoginRoute
+  OfficerIndexRoute: typeof OfficerIndexRoute
+}
+
+const OfficerRouteChildren: OfficerRouteChildren = {
+  OfficerApplicationsRoute: OfficerApplicationsRouteWithChildren,
+  OfficerLoginRoute: OfficerLoginRoute,
+  OfficerIndexRoute: OfficerIndexRoute,
+}
+
+const OfficerRouteWithChildren =
+  OfficerRoute._addFileChildren(OfficerRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
+  ApplyRoute: ApplyRouteWithChildren,
+  LookupRoute: LookupRoute,
+  OfficerRoute: OfficerRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
