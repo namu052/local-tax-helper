@@ -48,7 +48,7 @@ function LookupPage() {
       if (!data || (Array.isArray(data) && data.length === 0)) {
         setError("접수번호와 전화번호가 일치하는 신청 내역을 찾을 수 없습니다.");
       } else {
-        setResult(Array.isArray(data) ? data[0] : data);
+        setResult((Array.isArray(data) ? data[0] : data) as unknown as ResultRow);
       }
     } catch (err) {
       console.error(err);
