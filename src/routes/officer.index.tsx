@@ -31,27 +31,36 @@ function Dashboard() {
   }, []);
 
   const cards = [
-    { label: "전체 신청", value: total, tone: "bg-primary/10 text-primary" },
-    { label: "AI 검토 대기", value: counts["AI 검토 대기"] ?? 0, tone: "bg-info/15 text-info" },
-    { label: "AI 검토 완료", value: counts["AI 검토 완료"] ?? 0, tone: "bg-accent text-accent-foreground" },
-    { label: "담당자 검토 중", value: counts["담당자 검토 중"] ?? 0, tone: "bg-primary/10 text-primary" },
-    { label: "보완 요청", value: counts["보완 요청"] ?? 0, tone: "bg-warning/15 text-warning" },
-    { label: "답변 완료", value: counts["답변 완료"] ?? 0, tone: "bg-success/15 text-success" },
+    { label: "전체 신청", value: total, icon: Inbox, tone: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
+    { label: "AI 검토 대기", value: counts["AI 검토 대기"] ?? 0, icon: Clock, tone: "text-info", bg: "bg-info/10", border: "border-info/30" },
+    { label: "AI 검토 완료", value: counts["AI 검토 완료"] ?? 0, icon: CheckCircle2, tone: "text-accent-foreground", bg: "bg-accent", border: "border-accent" },
+    { label: "담당자 검토 중", value: counts["담당자 검토 중"] ?? 0, icon: UserCheck, tone: "text-primary", bg: "bg-primary/5", border: "border-primary/20" },
+    { label: "보완 요청", value: counts["보완 요청"] ?? 0, icon: AlertTriangle, tone: "text-warning", bg: "bg-warning/10", border: "border-warning/30" },
+    { label: "답변 완료", value: counts["답변 완료"] ?? 0, icon: FileCheck, tone: "text-success", bg: "bg-success/10", border: "border-success/30" },
   ];
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">공무원 대시보드</h1>
+      <div>
+        <h1 className="text-2xl font-bold">공무원 대시보드</h1>
+        <p className="text-sm text-muted-foreground mt-1">지방세 감면 신청 처리 현황을 한눈에 확인하세요.</p>
+      </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {cards.map((c) => (
-          <Card key={c.label}>
-            <CardContent className="pt-6">
-              <p className="text-xs text-muted-foreground">{c.label}</p>
-              <p className={`text-3xl font-bold mt-1 ${c.tone.split(" ")[1] ?? ""}`}>{c.value}</p>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        {cards.map((c) => {
+          const Icon = c.icon;
+          return (
+            <Card key={c.label} className={`${c.border} border`}>
+              <CardContent className="pt-5 pb-4">
+                <div className={`inline-flex h-9 w-9 items-center justify-center rounded-md ${c.bg} ${c.tone} mb-3`}>
+                  <Icon className="h-4 w-4" />
+                </div>
+                <p className="text-xs text-muted-foreground">{c.label}</p>
+                <p className={`text-2xl font-bold mt-0.5 ${c.tone}`}>{c.value}</p>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       <Card>
