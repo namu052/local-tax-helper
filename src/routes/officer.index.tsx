@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { statusBadgeClass, STATUSES } from "@/lib/status";
+import { Inbox, Clock, CheckCircle2, UserCheck, AlertTriangle, FileCheck } from "lucide-react";
 
 export const Route = createFileRoute("/officer/")({
   head: () => ({ meta: [{ title: "공무원 대시보드" }] }),
