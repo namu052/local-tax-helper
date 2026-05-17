@@ -111,7 +111,7 @@ function ApplyPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-6 py-8">
+      <main className="mx-auto max-w-3xl px-4 sm:px-6 py-6 sm:py-8">
         <div className="rounded-lg border-2 border-warning bg-warning/10 p-4 mb-6 flex items-start gap-3">
           <AlertTriangle className="h-5 w-5 text-warning mt-0.5 shrink-0" />
           <div className="text-sm">
