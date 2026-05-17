@@ -16,13 +16,19 @@ export const Route = createFileRoute("/")({
 function Index() {
   return (
     <div className="min-h-screen bg-background">
+      <div className="bg-primary text-primary-foreground text-xs">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-1.5 flex items-center justify-between">
+          <span>○○시청 지방세과 · 감면 신청 민원 포털</span>
+          <span className="hidden sm:inline opacity-80">교육용 프로토타입 (Demo)</span>
+        </div>
+      </div>
       <header className="border-b border-border bg-card">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold">지방세</div>
+            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold">세</div>
             <div>
-              <h1 className="text-base font-semibold text-foreground">AI 기반 지방세 감면 신청 시스템</h1>
-              <p className="text-xs text-muted-foreground">매뉴얼 근거 검토 · 교육용 프로토타입</p>
+              <h1 className="text-sm sm:text-base font-semibold text-foreground">AI 기반 지방세 감면 신청 시스템</h1>
+              <p className="text-xs text-muted-foreground">매뉴얼 근거 검토 · 사전검토 자동화</p>
             </div>
           </div>
           <Link to="/officer/login">
@@ -31,24 +37,28 @@ function Index() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-6 py-12">
-        <div className="rounded-lg border border-warning/40 bg-warning/10 p-4 mb-10 flex items-start gap-3">
+      <main className="mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12">
+        <div className="rounded-lg border border-warning/40 bg-warning/10 p-4 mb-8 flex items-start gap-3">
           <AlertTriangle className="h-5 w-5 text-warning mt-0.5 shrink-0" />
           <div className="text-sm">
-            <p className="font-semibold text-foreground">교육용 프로토타입 안내</p>
-            <p className="text-muted-foreground mt-1">
-              본 시스템은 교육용 프로토타입입니다. 실제 개인정보(주민등록번호, 전화번호 등) 대신
-              <strong> 테스트용 더미 데이터</strong>만 입력해 주세요. AI는 감면 여부를 확정하지 않으며,
+            <p className="font-semibold text-foreground">교육용 프로토타입 · 개인정보 보호 안내</p>
+            <p className="text-muted-foreground mt-1 leading-relaxed">
+              본 시스템은 교육용 프로토타입입니다. 실제 주민등록번호·전화번호 등 개인정보 대신
+              <strong className="text-foreground"> 테스트용 더미 데이터</strong>만 입력해 주세요.
+              주민등록번호는 원문으로 저장되지 않으며 마스킹 처리됩니다. AI는 감면 여부를 확정하지 않으며,
               담당 공무원의 사전검토 참고자료만 생성합니다.
             </p>
           </div>
         </div>
 
-        <section className="mb-12">
-          <h2 className="text-3xl font-bold text-foreground tracking-tight">지방세 감면 신청을 온라인으로</h2>
-          <p className="mt-3 text-muted-foreground max-w-2xl">
-            민원인이 신청서를 제출하면 AI가 매뉴얼을 검색하여 사전검토 자료를 생성하고,
-            담당 공무원이 이를 참고하여 최종 답변을 작성합니다.
+        <section className="mb-10">
+          <p className="text-xs font-semibold text-primary tracking-wider uppercase">지방세 감면 민원 서비스</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight mt-2">
+            감면 신청부터 매뉴얼 근거 검토까지, 한 곳에서
+          </h2>
+          <p className="mt-3 text-muted-foreground max-w-2xl text-sm sm:text-base leading-relaxed">
+            민원인이 온라인으로 감면 신청을 제출하면, AI가 지방세 감면 매뉴얼 1권·2권에서 관련 근거를 찾아
+            사전검토 자료를 생성합니다. 담당 공무원은 이를 참고하여 최종 답변을 작성합니다.
           </p>
         </section>
 
@@ -93,6 +103,12 @@ function Index() {
           </Card>
         </div>
       </main>
+      <footer className="border-t border-border bg-card mt-12">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-6 text-xs text-muted-foreground space-y-1">
+          <p>본 AI 검토 결과는 업로드된 감면 매뉴얼을 참고하여 생성된 사전검토 자료입니다. 최종 감면 여부는 관련 법령, 조례, 제출 서류 및 담당 공무원의 검토에 따라 결정됩니다.</p>
+          <p>© 교육용 프로토타입 · AI 기반 지방세 감면 신청 시스템</p>
+        </div>
+      </footer>
     </div>
   );
 }

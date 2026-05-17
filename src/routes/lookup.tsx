@@ -67,7 +67,10 @@ function LookupPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-2xl px-6 py-8 space-y-6">
+      <main className="mx-auto max-w-2xl px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+        <div className="rounded-lg border border-info/30 bg-info/5 p-3 text-xs text-muted-foreground">
+          본인 확인을 위해 신청 시 입력한 <strong className="text-foreground">접수번호와 전화번호가 모두 일치</strong>해야 결과를 조회할 수 있습니다.
+        </div>
         <Card>
           <CardHeader><CardTitle className="text-base">조회 정보 입력</CardTitle></CardHeader>
           <CardContent>
