@@ -192,8 +192,13 @@ function Detail() {
         onLoadDraft={loadAiDraft}
       />
 
-      <Card>
-        <CardHeader><CardTitle className="text-base">담당 공무원 최종 답변 작성</CardTitle></CardHeader>
+      <Card className="border-2 border-primary/40">
+        <CardHeader className="bg-primary/5 border-b border-primary/20">
+          <CardTitle className="text-base flex items-center gap-2">
+            <span className="inline-flex h-6 w-6 items-center justify-center rounded bg-primary text-primary-foreground text-xs font-bold">✓</span>
+            담당 공무원 최종 답변 작성 <span className="text-xs font-normal text-muted-foreground">(공식 답변)</span>
+          </CardTitle>
+        </CardHeader>
         <CardContent className="space-y-4">
           {aiReview?.draft_answer && (
             <Button type="button" variant="outline" size="sm" onClick={loadAiDraft}>
