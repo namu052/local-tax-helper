@@ -1,0 +1,3 @@
+CREATE POLICY "staff insert ai reviews" ON public.ai_reviews FOR INSERT TO authenticated WITH CHECK (public.has_any_staff_role(auth.uid()));
+CREATE POLICY "staff update ai reviews" ON public.ai_reviews FOR UPDATE TO authenticated USING (public.has_any_staff_role(auth.uid())) WITH CHECK (public.has_any_staff_role(auth.uid()));
+CREATE POLICY "staff delete ai reviews" ON public.ai_reviews FOR DELETE TO authenticated USING (public.has_any_staff_role(auth.uid()));
