@@ -329,12 +329,21 @@ function AiReviewPanel({
 
             <Section label="참고 매뉴얼 근거">
               {hasRefs ? (
-                <ul className="space-y-1 not-italic text-foreground">
+                <ul className="space-y-2 not-italic text-foreground">
                   {refs.map((r, i) => (
-                    <li key={i} className="text-sm">
-                      • {r.manual_title ?? "매뉴얼"} {r.volume_number ? `${r.volume_number}권` : ""}
-                      {r.page_number ? ` p.${r.page_number}` : ""}
-                      {r.section_title ? `, ${r.section_title}` : ""}
+                    <li key={i} className="flex items-start gap-2 p-2 rounded-md bg-background border border-border">
+                      <span className="inline-flex shrink-0 items-center px-2 py-0.5 rounded text-xs font-semibold bg-info/15 text-info border border-info/30">
+                        {r.volume_number ? `${r.volume_number}권` : "매뉴얼"}
+                      </span>
+                      {r.page_number && (
+                        <span className="inline-flex shrink-0 items-center px-2 py-0.5 rounded text-xs font-mono bg-muted text-foreground border border-border">
+                          p.{r.page_number}
+                        </span>
+                      )}
+                      <span className="text-sm">
+                        {r.manual_title ?? "지방세 감면 매뉴얼"}
+                        {r.section_title ? ` · ${r.section_title}` : ""}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -345,9 +354,13 @@ function AiReviewPanel({
               )}
             </Section>
 
-            <p className="text-xs text-muted-foreground italic border-t pt-3">
-              본 AI 검토 결과는 업로드된 감면 매뉴얼을 참고하여 생성된 사전검토 자료입니다. 최종 감면 여부는 관련 법령, 조례, 제출 서류 및 담당 공무원의 검토에 따라 결정됩니다.
-            </p>
+            <div className="rounded-md bg-warning/10 border border-warning/30 p-3">
+              <p className="text-xs text-foreground font-semibold">⚠ AI는 최종 판단을 하지 않습니다</p>
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                본 AI 검토 결과는 업로드된 감면 매뉴얼을 참고하여 생성된 사전검토 자료입니다.
+                최종 감면 여부는 관련 법령, 조례, 제출 서류 및 담당 공무원의 검토에 따라 결정됩니다.
+              </p>
+            </div>
           </>
         )}
       </CardContent>
