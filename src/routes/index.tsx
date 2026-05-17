@@ -103,6 +103,12 @@ function Index() {
           </Card>
         </div>
       </main>
+      <footer className="border-t border-border bg-card mt-12">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-6 text-xs text-muted-foreground space-y-1">
+          <p>본 AI 검토 결과는 업로드된 감면 매뉴얼을 참고하여 생성된 사전검토 자료입니다. 최종 감면 여부는 관련 법령, 조례, 제출 서류 및 담당 공무원의 검토에 따라 결정됩니다.</p>
+          <p>© 교육용 프로토타입 · AI 기반 지방세 감면 신청 시스템</p>
+        </div>
+      </footer>
     </div>
   );
 }
