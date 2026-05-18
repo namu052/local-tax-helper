@@ -35,7 +35,12 @@ function LookupPage() {
 
   async function handleSearch(e: React.FormEvent) {
     e.preventDefault();
-    setError(""); setResult(null); setLoading(true);
+    setError(""); setResult(null);
+    if (!receipt.trim() && !phone.trim()) {
+      setError("접수번호 또는 전화번호 중 하나 이상을 입력해 주세요.");
+      return;
+    }
+    setLoading(true);
     try {
       // applicants는 공무원만 SELECT 가능. 익명 조회는 서버에서 receipt+phone 일치만 노출하기 위해
       // tax_applications + applicants 조인 RPC가 이상적이나, 1단계 단순화를 위해
@@ -69,7 +74,7 @@ function LookupPage() {
 
       <main className="mx-auto max-w-2xl px-4 sm:px-6 py-6 sm:py-8 space-y-6">
         <div className="rounded-lg border border-info/30 bg-info/5 p-3 text-xs text-muted-foreground">
-          본인 확인을 위해 신청 시 입력한 <strong className="text-foreground">접수번호와 전화번호가 모두 일치</strong>해야 결과를 조회할 수 있습니다.
+          신청 시 입력한 <strong className="text-foreground">접수번호 또는 전화번호 중 하나</strong>만 일치해도 결과를 조회할 수 있습니다.
         </div>
         <Card>
           <CardHeader><CardTitle className="text-base">조회 정보 입력</CardTitle></CardHeader>
