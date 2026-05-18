@@ -553,6 +553,8 @@ export type Database = {
       lookup_application_by_receipt: {
         Args: { _phone: string; _receipt: string }
         Returns: {
+          additional_note: string
+          application_reason: string
           created_at: string
           exemption_types: Json
           officer_answers: Json
