@@ -62,38 +62,29 @@ function ApplyPage() {
 
     setSubmitting(true);
     try {
-      const { data: applicant, error: aErr } = await supabase
-        .from("applicants")
-        .insert({ name, address, phone, rrn_front: parsed.front, rrn_masked: parsed.masked })
-        .select()
-        .single();
-      if (aErr) throw aErr;
+      const documents = requiredDocs.map((doc) => ({
+        document_name: doc,
+        is_submitted: !!checkedDocs[doc],
+      }));
 
-      const { data: app, error: appErr } = await supabase
-        .from("tax_applications")
-        .insert({
-          applicant_id: applicant.id,
-          tax_type: taxType,
-          exemption_type_id: exemptionTypeId,
-          application_reason: reason,
-          additional_note: note,
-          status: "AI 검토 대기",
-        })
-        .select("id, receipt_number")
-        .single();
-      if (appErr) throw appErr;
+      const { data, error } = await supabase.rpc("submit_tax_application", {
+        p_name: name,
+        p_address: address,
+        p_phone: phone,
+        p_rrn_front: parsed.front,
+        p_rrn_masked: parsed.masked,
+        p_tax_type: taxType,
+        p_exemption_type_id: exemptionTypeId,
+        p_application_reason: reason,
+        p_additional_note: note,
+        p_documents: documents,
+      });
+      if (error) throw error;
 
-      if (requiredDocs.length > 0) {
-        await supabase.from("application_documents").insert(
-          requiredDocs.map((doc) => ({
-            application_id: app.id,
-            document_name: doc,
-            is_submitted: !!checkedDocs[doc],
-          })),
-        );
-      }
+      const row = Array.isArray(data) ? data[0] : data;
+      if (!row?.receipt_number) throw new Error("접수번호를 받지 못했습니다");
 
-      navigate({ to: "/apply/complete", search: { receipt: app.receipt_number } });
+      navigate({ to: "/apply/complete", search: { receipt: row.receipt_number } });
     } catch (err) {
       console.error(err);
       toast.error("신청 중 오류가 발생했습니다.");
