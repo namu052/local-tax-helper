@@ -132,7 +132,7 @@ function ApplyPage() {
                 <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="010-0000-0000" />
               </div>
               <div>
-                <Label htmlFor="rrn">주민등록번호 * <span className="text-destructive text-xs">(테스트용 더미 데이터만 입력)</span></Label>
+                <Label htmlFor="rrn">주민등록번호 *</Label>
                 <Input id="rrn" value={rrn} onChange={(e) => setRrn(e.target.value)} placeholder="900101-1234567" />
                 <p className="text-xs text-muted-foreground mt-1">저장 시 자동 마스킹됩니다 (예: 900101-1******)</p>
               </div>
