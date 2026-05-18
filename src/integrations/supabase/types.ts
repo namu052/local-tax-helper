@@ -561,6 +561,24 @@ export type Database = {
           tax_type: string
         }[]
       }
+      submit_tax_application: {
+        Args: {
+          p_additional_note: string
+          p_address: string
+          p_application_reason: string
+          p_documents: Json
+          p_exemption_type_id: string
+          p_name: string
+          p_phone: string
+          p_rrn_front: string
+          p_rrn_masked: string
+          p_tax_type: string
+        }
+        Returns: {
+          application_id: string
+          receipt_number: string
+        }[]
+      }
     }
     Enums: {
       app_role: "officer" | "admin"
