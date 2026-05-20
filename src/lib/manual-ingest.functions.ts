@@ -11,6 +11,8 @@ import {
   summarize,
 } from "./manual-classify";
 
+const PAGE_BATCH = 20;
+
 async function assertAdmin(userId: string) {
   const { data, error } = await supabaseAdmin
     .from("user_roles")
@@ -24,8 +26,14 @@ async function assertAdmin(userId: string) {
 
 export const ingestManualVolume = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { volumeId: string }) =>
-    z.object({ volumeId: z.string().uuid() }).parse(d),
+  .inputValidator((d: { volumeId: string; startPage?: number; reset?: boolean }) =>
+    z
+      .object({
+        volumeId: z.string().uuid(),
+        startPage: z.number().int().min(1).max(5000).optional(),
+        reset: z.boolean().optional(),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
@@ -38,7 +46,12 @@ export const ingestManualVolume = createServerFn({ method: "POST" })
     if (ve || !vol) throw new Error("매뉴얼 권 정보를 찾을 수 없습니다");
     if (!vol.file_url) throw new Error("업로드된 PDF 파일이 없습니다");
 
-    await supabaseAdmin.from("manual_chunks").delete().eq("manual_volume_id", vol.id);
+    const startPage = data.startPage ?? 1;
+    const reset = data.reset ?? startPage === 1;
+
+    if (reset) {
+      await supabaseAdmin.from("manual_chunks").delete().eq("manual_volume_id", vol.id);
+    }
 
     const { data: blob, error: dlErr } = await supabaseAdmin.storage
       .from("manuals")
@@ -46,39 +59,36 @@ export const ingestManualVolume = createServerFn({ method: "POST" })
     if (dlErr || !blob) throw new Error("PDF 다운로드 실패: " + (dlErr?.message ?? ""));
 
     const buf = new Uint8Array(await blob.arrayBuffer());
-    const { extractText, getDocumentProxy } = await import("unpdf");
+    const { getDocumentProxy } = await import("unpdf");
     const pdf = await getDocumentProxy(buf);
     const totalPages: number = pdf.numPages;
 
-    let pages: string[] = [];
+    const endPage = Math.min(totalPages, startPage + PAGE_BATCH - 1);
     const failedPages: number[] = [];
-    try {
-      const res = await extractText(pdf, { mergePages: false });
-      pages = Array.isArray(res.text) ? res.text : [String(res.text ?? "")];
-    } catch (e: any) {
-      throw new Error("PDF 텍스트 추출 실패: " + (e?.message ?? String(e)));
-    }
-
-    let totalChunks = 0;
-    const BATCH = 300;
-    let batch: any[] = [];
+    let chunksInserted = 0;
+    const batch: any[] = [];
     const flush = async () => {
       if (batch.length === 0) return;
       const { error } = await supabaseAdmin.from("manual_chunks").insert(batch);
       if (error) throw new Error("청크 저장 실패: " + error.message);
-      totalChunks += batch.length;
-      batch = [];
+      chunksInserted += batch.length;
+      batch.length = 0;
     };
 
-    for (let i = 0; i < pages.length; i++) {
-      const pageNum = i + 1;
-      const pageText = pages[i] ?? "";
-      if (!pageText || !pageText.trim()) {
-        if (!pageText) failedPages.push(pageNum);
-        continue;
-      }
+    for (let pageNum = startPage; pageNum <= endPage; pageNum++) {
       try {
-        const chunks = chunkPageText(pageText, 600);
+        const page = await pdf.getPage(pageNum);
+        const content = await page.getTextContent();
+        const text = (content.items as any[])
+          .map((it) => (typeof it?.str === "string" ? it.str : ""))
+          .join(" ")
+          .replace(/\s+/g, " ")
+          .trim();
+        if (!text) {
+          failedPages.push(pageNum);
+          continue;
+        }
+        const chunks = chunkPageText(text, 600);
         for (const c of chunks) {
           batch.push({
             manual_volume_id: vol.id,
@@ -90,7 +100,7 @@ export const ingestManualVolume = createServerFn({ method: "POST" })
             legal_basis: detectLegalBasis(c),
             keywords: extractKeywords(c),
           });
-          if (batch.length >= BATCH) await flush();
+          if (batch.length >= 200) await flush();
         }
       } catch {
         failedPages.push(pageNum);
@@ -98,11 +108,16 @@ export const ingestManualVolume = createServerFn({ method: "POST" })
     }
     await flush();
 
+    const done = endPage >= totalPages;
     return {
       volumeId: vol.id,
       volumeNumber: vol.volume_number,
       totalPages,
-      totalChunks,
+      startPage,
+      endPage,
+      nextPage: done ? null : endPage + 1,
+      done,
+      chunksInserted,
       failedPages,
     };
   });
@@ -186,7 +201,6 @@ export const searchManualChunks = createServerFn({ method: "POST" })
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
 
-    // Enrich with volume + set metadata
     const ids = Array.from(new Set((rows ?? []).map((r) => r.manual_volume_id)));
     const { data: vols } = await supabaseAdmin
       .from("manual_volumes")
