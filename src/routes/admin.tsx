@@ -565,6 +565,7 @@ function IngestPanel({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [lastResult, setLastResult] = useState<{ failedPages: number[]; totalChunks: number } | null>(null);
+  const [progress, setProgress] = useState<{ vol: number; page: number; total: number } | null>(null);
 
   const reloadStats = useCallback(() => {
     fetchStats({ data: { setId: set.id } }).then(setStats).catch(() => setStats({}));
@@ -581,28 +582,49 @@ function IngestPanel({
     .pop();
   const hasExisting = totalChunks > 0;
 
+  const ingestVolumeFully = async (
+    volumeId: string,
+    volNum: number,
+  ): Promise<{ chunks: number; failed: number[] }> => {
+    let nextPage: number | null = 1;
+    let reset = true;
+    let total = 0;
+    const failed: number[] = [];
+    while (nextPage !== null) {
+      const r: any = await ingest({ data: { volumeId, startPage: nextPage, reset } });
+      total += r.chunksInserted ?? 0;
+      failed.push(...(r.failedPages ?? []));
+      setProgress({ vol: volNum, page: r.endPage, total: r.totalPages });
+      nextPage = r.nextPage;
+      reset = false;
+    }
+    return { chunks: total, failed };
+  };
+
   const runIngest = async () => {
     setConfirmOpen(false);
     setErrorMsg(null);
     setLastResult(null);
+    setProgress(null);
     try {
       let aggFailed: number[] = [];
       let aggChunks = 0;
       if (v1) {
         setStatus("v1");
-        const r = await ingest({ data: { volumeId: v1.id } });
-        aggFailed = aggFailed.concat(r.failedPages.map((p) => p));
-        aggChunks += r.totalChunks;
+        const r = await ingestVolumeFully(v1.id, 1);
+        aggFailed = aggFailed.concat(r.failed);
+        aggChunks += r.chunks;
       }
       if (v2) {
         setStatus("v2");
-        const r = await ingest({ data: { volumeId: v2.id } });
-        aggFailed = aggFailed.concat(r.failedPages.map((p) => p + 10000)); // mark vol2
-        aggChunks += r.totalChunks;
+        const r = await ingestVolumeFully(v2.id, 2);
+        aggFailed = aggFailed.concat(r.failed.map((p) => p + 10000));
+        aggChunks += r.chunks;
       }
       setStatus("saving");
       reloadStats();
       setStatus("done");
+      setProgress(null);
       setLastResult({ failedPages: aggFailed, totalChunks: aggChunks });
       toast.success(`DB화 완료: 총 ${aggChunks}개 청크 저장`);
     } catch (e: any) {
@@ -614,8 +636,8 @@ function IngestPanel({
 
   const statusLabel: Record<IngestStatus, string> = {
     idle: "처리 대기",
-    v1: "1권 처리 중...",
-    v2: "2권 처리 중...",
+    v1: progress ? `1권 처리 중... (${progress.page}/${progress.total}p)` : "1권 처리 중...",
+    v2: progress ? `2권 처리 중... (${progress.page}/${progress.total}p)` : "2권 처리 중...",
     saving: "청크 저장 중...",
     done: "완료",
     error: "오류 발생",
