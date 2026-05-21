@@ -75,13 +75,19 @@ export const ingestManualVolume = createServerFn({ method: "POST" })
       batch.length = 0;
     };
 
+    // Strip NUL bytes and other control chars that break Postgres text/json input
+    const sanitize = (s: string) =>
+      s.replace(/\u0000/g, "").replace(/[\u0001-\u0008\u000B\u000C\u000E-\u001F]/g, " ");
+
     for (let pageNum = startPage; pageNum <= endPage; pageNum++) {
       try {
         const page = await pdf.getPage(pageNum);
         const content = await page.getTextContent();
-        const text = (content.items as any[])
-          .map((it) => (typeof it?.str === "string" ? it.str : ""))
-          .join(" ")
+        const text = sanitize(
+          (content.items as any[])
+            .map((it) => (typeof it?.str === "string" ? it.str : ""))
+            .join(" "),
+        )
           .replace(/\s+/g, " ")
           .trim();
         if (!text) {
@@ -90,15 +96,20 @@ export const ingestManualVolume = createServerFn({ method: "POST" })
         }
         const chunks = chunkPageText(text, 600);
         for (const c of chunks) {
+          const cs = sanitize(c);
+          const kws = extractKeywords(cs)
+            .map((k) => sanitize(k).trim())
+            .filter((k) => k.length > 0 && k.length <= 50);
+          const lb = detectLegalBasis(cs);
           batch.push({
             manual_volume_id: vol.id,
             page_number: pageNum,
-            chunk_text: c,
-            chunk_summary: summarize(c),
-            tax_type: detectTaxType(c),
-            exemption_type: detectExemptionType(c),
-            legal_basis: detectLegalBasis(c),
-            keywords: extractKeywords(c),
+            chunk_text: cs,
+            chunk_summary: sanitize(summarize(cs)),
+            tax_type: detectTaxType(cs),
+            exemption_type: detectExemptionType(cs),
+            legal_basis: lb ? sanitize(lb) : null,
+            keywords: kws,
           });
           if (batch.length >= 200) await flush();
         }
