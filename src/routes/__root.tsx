@@ -73,14 +73,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "AI 기반 지방세 감면 신청 시스템" },
+      { name: "description", content: "AI 지방세 감면 신청 및 매뉴얼 검토 웹앱." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "AI 기반 지방세 감면 신청 시스템" },
+      { property: "og:description", content: "AI 지방세 감면 신청 및 매뉴얼 검토 웹앱." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "AI 기반 지방세 감면 신청 시스템" },
+      { name: "twitter:description", content: "AI 지방세 감면 신청 및 매뉴얼 검토 웹앱." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/d492d7b9-f57e-41e8-9927-8592e38db9b3/id-preview-898c29ee--a574b65b-4aad-491a-b6b6-251ae9d6fa2c.lovable.app-1779331577801.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/d492d7b9-f57e-41e8-9927-8592e38db9b3/id-preview-898c29ee--a574b65b-4aad-491a-b6b6-251ae9d6fa2c.lovable.app-1779331577801.png" },
     ],
     links: [
       {
